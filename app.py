@@ -1,6 +1,6 @@
 # app.py
 import streamlit as st
-import shortuuid
+import uuid
 import webbrowser
 from urllib.parse import urlparse
 from db import init_db, salvar_link, buscar_link
@@ -12,9 +12,9 @@ st.set_page_config(page_title="Encurtador de Links", layout="centered")
 st.title("🔗 Encurtador de Links")
 
 # Verifica se tem ?id= na URL para redirecionamento
-query_params = st.experimental_get_query_params()
+query_params = st.query_params
 if "id" in query_params:
-    codigo = query_params["id"][0]
+    codigo = query_params["id"]
     url = buscar_link(codigo)
     if url:
         st.success(f"Redirecionando para: {url}")
@@ -32,10 +32,11 @@ if submit and original_url:
     if not urlparse(original_url).scheme:
         original_url = "https://" + original_url
 
-    codigo = shortuuid.ShortUUID().random(length=6)
+    codigo = str(uuid.uuid4())[:6]  # Gera ID curto
     salvar_link(codigo, original_url)
 
-    base_url = st.request.url.replace("?", "")
+    # 🔁 Use o domínio real do seu app aqui:
+    base_url = "https://ecurterlinks.streamlit.app"  # Altere para seu domínio real
     short_link = f"{base_url}?id={codigo}"
 
     st.success("Link encurtado com sucesso!")
